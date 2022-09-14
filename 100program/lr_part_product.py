@@ -11,6 +11,7 @@ from sklearn import linear_model
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import LabelEncoder
+import base64
 
 st.title('機械学習による予測パート')
 st.write('# 結果')
@@ -37,6 +38,8 @@ if uploaded_files:
     # モデリング
     df = pd.read_csv(uploaded_files)
     df_columns = df.columns
+    # これで何回目か測ることができる
+    csv_len = len(df)
     ex = ['体重', '身長', 'BMI', '5%ロング缶', '5%ショート缶', 'ワイン', '総アルコール量']
     ob = ['血中アルコール濃度']
 
@@ -87,4 +90,12 @@ if uploaded_files:
         st.write('以下のような症状が見られるはずです。')
         st.write(shoujyou)
 
+        # dfに行追加
+        y_pred = float(y_pred)
+        df.loc[csv_len] = [weight, height, bmi, al_5per_500ml, al_5per_350ml, al_wine, al_total, y_pred]
 
+        # df.to_csv("data_al.csv")
+        csv_al = df.to_csv(index=False)  
+        b64 = base64.b64encode(csv_al.encode()).decode()
+        href = f'<a href="data:application/octet-stream;base64,{b64}" download="result.csv">download</a>'
+        st.markdown(f"ダウンロードする {href}", unsafe_allow_html=True)
